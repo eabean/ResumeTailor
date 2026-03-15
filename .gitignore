@@ -1,0 +1,23 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Database
+data/*.db
+
+# Generated outputs
+outputs/
+
+# OS
+.DS_Store
+Thumbs.db

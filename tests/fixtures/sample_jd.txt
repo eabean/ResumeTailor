@@ -1,0 +1,17 @@
+Software Engineer — Backend
+
+Acme Corp is looking for a backend software engineer to join our payments team.
+
+Responsibilities:
+- Design and build scalable REST APIs in Python
+- Work with PostgreSQL and Redis for data storage and caching
+- Collaborate with frontend engineers and product managers
+- Participate in code reviews and technical discussions
+- Write unit and integration tests for all new code
+
+Requirements:
+- 2+ years of experience with Python
+- Experience with relational databases (PostgreSQL preferred)
+- Familiarity with REST API design
+- Strong communication skills
+- Experience with Docker and CI/CD pipelines is a plus
