@@ -51,6 +51,7 @@ st.title("📄 Resume Tailor")
 # ── Sidebar ────────────────────────────────────────────────────────────────
 
 BASE_RESUME_PATH = Path("data/BaseResume.tex")
+BASE_COVER_PATH = Path("data/BaseCoverLetter.tex")
 
 with st.sidebar:
     st.header("Base Resume")
@@ -67,6 +68,20 @@ with st.sidebar:
         )
     else:
         st.error(f"Base resume not found at {BASE_RESUME_PATH}")
+
+    base_cover_tex: str | None = None
+    if BASE_COVER_PATH.exists():
+        base_cover_tex = BASE_COVER_PATH.read_text(encoding="utf-8")
+        st.success(f"Loaded: {BASE_COVER_PATH.name}")
+        st.download_button(
+            "⬇️ Download Base Cover Letter",
+            data=base_cover_tex,
+            file_name=BASE_COVER_PATH.name,
+            mime="text/x-tex",
+            use_container_width=True,
+        )
+    else:
+        st.error(f"Base cover letter not found at {BASE_COVER_PATH}")
 
     st.divider()
 
@@ -122,11 +137,13 @@ with tab_tailor:
         st.subheader("Actions")
         st.write("")
 
-        ready = bool(base_tex and job_desc.strip() and company.strip() and job_title.strip())
+        ready = bool(base_tex and base_cover_tex and job_desc.strip() and company.strip() and job_title.strip())
         if not ready:
             missing = []
             if not base_tex:
                 missing.append("base resume (data/BaseResume.tex not found)")
+            if not base_cover_tex:
+                missing.append("base cover letter (data/BaseCoverLetter.tex not found)")
             if not job_desc.strip():
                 missing.append("job description")
             if not company.strip():
@@ -148,6 +165,7 @@ with tab_tailor:
                 st.write("Calling Claude API...")
                 result = run_pipeline(
                     base_tex=base_tex,
+                    base_cover_tex=base_cover_tex,
                     job_desc=job_desc,
                     profile=profile,
                     company=company,

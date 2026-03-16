@@ -17,6 +17,8 @@ data/*.db
 
 # Personal resume
 data/BaseResume.tex
+data/BaseCoverLetter.tex
+
 
 # Generated outputs
 outputs/

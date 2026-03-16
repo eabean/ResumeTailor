@@ -41,7 +41,7 @@ Your task:
 - CRITICAL: Do NOT invent, embellish, or add credentials, skills, or experiences not present in the inputs
 - Keep all LaTeX syntax valid and fully compilable
 - Keep the overall structure and formatting of the base resume intact
-- Write a professional, specific cover letter that references the company and role
+- Adapt the base cover letter to target the specific company and role, updating only the relevant details
 
 Return your response in exactly this format, with no text outside the XML tags:
 
@@ -95,23 +95,24 @@ def _extract_tag(text: str, tag: str) -> str:
     return match.group(1).strip()
 
 
-def build_context(base_tex: str, job_desc: str, profile: dict) -> str:
+def build_context(base_tex: str, base_cover_tex: str, job_desc: str, profile: dict) -> str:
     """Format all inputs into a single context string for the prompt."""
     return (
         f"=== APPLICANT PROFILE ===\n{json.dumps(profile, indent=2)}\n\n"
         f"=== JOB DESCRIPTION ===\n{job_desc.strip()}\n\n"
-        f"=== BASE RESUME (LaTeX) ===\n{base_tex.strip()}"
+        f"=== BASE RESUME (LaTeX) ===\n{base_tex.strip()}\n\n"
+        f"=== BASE COVER LETTER (LaTeX) ===\n{base_cover_tex.strip()}"
     )
 
 
-def tailor(base_tex: str, job_desc: str, profile: dict) -> TailorResult:
+def tailor(base_tex: str, base_cover_tex: str, job_desc: str, profile: dict) -> TailorResult:
     """
     Call the OpenAI API to produce a tailored resume and cover letter.
     Returns a TailorResult with both .tex sources.
     Raises ValueError if the response is malformed.
     """
     client = _get_client()
-    context = build_context(base_tex, job_desc, profile)
+    context = build_context(base_tex, base_cover_tex, job_desc, profile)
 
     response = client.chat.completions.create(
         model=MODEL,

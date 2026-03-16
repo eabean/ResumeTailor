@@ -71,6 +71,7 @@ def _compile_with_retry(tex: str, tag: str) -> bytes:
 
 def run_pipeline(
     base_tex: str,
+    base_cover_tex: str,
     job_desc: str,
     profile: dict,
     company: str,
@@ -80,11 +81,12 @@ def run_pipeline(
     Run the full tailoring pipeline.
 
     Args:
-        base_tex:   The user's master LaTeX resume source.
-        job_desc:   The job description text.
-        profile:    The applicant profile dict from applicant_profile.json.
-        company:    Company name (for the tracker record).
-        job_title:  Job title (for the tracker record).
+        base_tex:       The user's master LaTeX resume source.
+        base_cover_tex: The user's master LaTeX cover letter source.
+        job_desc:       The job description text.
+        profile:        The applicant profile dict from applicant_profile.json.
+        company:        Company name (for the tracker record).
+        job_title:      Job title (for the tracker record).
 
     Returns:
         PipelineResult with PDFs, .tex sources, diff, and application ID.
@@ -94,7 +96,7 @@ def run_pipeline(
         LatexCompileError:  If PDF compilation fails after all retries.
         EnvironmentError:   If ANTHROPIC_API_KEY is missing.
     """
-    tailor_result = tailor.tailor(base_tex, job_desc, profile)
+    tailor_result = tailor.tailor(base_tex, base_cover_tex, job_desc, profile)
 
     resume_pdf = _compile_with_retry(tailor_result.resume_tex, tag="resume_tex")
     cover_pdf = _compile_with_retry(tailor_result.cover_letter_tex, tag="cover_letter_tex")
