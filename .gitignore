@@ -15,6 +15,9 @@ build/
 # Database
 data/*.db
 
+# Personal resume
+data/BaseResume.tex
+
 # Generated outputs
 outputs/
 

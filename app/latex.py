@@ -36,7 +36,7 @@ class LatexCompileError(Exception):
 
 
 def _check_tectonic() -> None:
-    """Verify tectonic is available on PATH. Called once at module import."""
+    """Verify tectonic is available on PATH."""
     if shutil.which("tectonic") is None:
         raise EnvironmentError(
             "tectonic is not installed or not on PATH.\n"
@@ -45,9 +45,6 @@ def _check_tectonic() -> None:
             "  macOS:   brew install tectonic\n"
             "  Linux:   cargo install tectonic"
         )
-
-
-_check_tectonic()
 
 
 def compile(tex_content: str, filename: str = "document") -> bytes:
@@ -64,6 +61,8 @@ def compile(tex_content: str, filename: str = "document") -> bytes:
     Raises:
         LatexCompileError: If tectonic reports a compilation error.
     """
+    _check_tectonic()
+
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
         tex_path = tmp_path / f"{filename}.tex"

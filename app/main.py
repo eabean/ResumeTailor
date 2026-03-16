@@ -7,8 +7,13 @@ Layout:
   Tab 2:    Applications dashboard (tracker table + status updates)
 """
 
-import json
+import sys
 from pathlib import Path
+
+# Ensure the project root is on sys.path when run via `streamlit run app/main.py`
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import json
 
 import streamlit as st
 
@@ -45,13 +50,23 @@ st.title("📄 Resume Tailor")
 
 # ── Sidebar ────────────────────────────────────────────────────────────────
 
+BASE_RESUME_PATH = Path("data/BaseResume.tex")
+
 with st.sidebar:
     st.header("Base Resume")
-    uploaded_file = st.file_uploader("Upload your master .tex file", type=["tex"])
     base_tex: str | None = None
-    if uploaded_file:
-        base_tex = uploaded_file.read().decode("utf-8")
-        st.success(f"Loaded: {uploaded_file.name}")
+    if BASE_RESUME_PATH.exists():
+        base_tex = BASE_RESUME_PATH.read_text(encoding="utf-8")
+        st.success(f"Loaded: {BASE_RESUME_PATH.name}")
+        st.download_button(
+            "⬇️ Download Base Resume",
+            data=base_tex,
+            file_name=BASE_RESUME_PATH.name,
+            mime="text/x-tex",
+            use_container_width=True,
+        )
+    else:
+        st.error(f"Base resume not found at {BASE_RESUME_PATH}")
 
     st.divider()
 
@@ -111,7 +126,7 @@ with tab_tailor:
         if not ready:
             missing = []
             if not base_tex:
-                missing.append("base resume (.tex)")
+                missing.append("base resume (data/BaseResume.tex not found)")
             if not job_desc.strip():
                 missing.append("job description")
             if not company.strip():

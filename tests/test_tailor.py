@@ -1,5 +1,5 @@
 """
-Tests for tailor.py — Claude API integration.
+Tests for tailor.py — OpenAI API integration.
 
 Covers:
   [A] Happy path: tailor() returns TailorResult with both .tex sources
@@ -38,12 +38,23 @@ def sample_profile():
 
 
 @pytest.fixture
-def mock_response(sample_resume):
-    data = json.loads((FIXTURES / "mock_claude_response.json").read_text())
+def mock_response_text():
+    data = json.loads((FIXTURES / "mock_response.json").read_text())
     return (
         f"<resume_tex>\n{data['resume_tex']}\n</resume_tex>\n"
         f"<cover_letter_tex>\n{data['cover_letter_tex']}\n</cover_letter_tex>"
     )
+
+
+def _make_openai_response(content: str) -> MagicMock:
+    """Build a minimal OpenAI chat completion response mock."""
+    message = MagicMock()
+    message.content = content
+    choice = MagicMock()
+    choice.message = message
+    response = MagicMock()
+    response.choices = [choice]
+    return response
 
 
 class TestExtractTag:
@@ -76,16 +87,13 @@ class TestBuildContext:
 
 class TestTailor:
     def test_happy_path_returns_tailor_result(
-        self, sample_resume, sample_jd, sample_profile, mock_response
+        self, sample_resume, sample_jd, sample_profile, mock_response_text
     ):
-        mock_content = MagicMock()
-        mock_content.text = mock_response
-        mock_message = MagicMock()
-        mock_message.content = [mock_content]
+        mock_response = _make_openai_response(mock_response_text)
 
-        with patch("app.tailor.anthropic.Anthropic") as MockClient:
-            MockClient.return_value.messages.create.return_value = mock_message
-            with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-test"}):
+        with patch("app.tailor.OpenAI") as MockClient:
+            MockClient.return_value.chat.completions.create.return_value = mock_response
+            with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
                 result = tailor(sample_resume, sample_jd, sample_profile)
 
         assert isinstance(result, TailorResult)
@@ -95,14 +103,11 @@ class TestTailor:
     def test_malformed_response_raises_value_error(
         self, sample_resume, sample_jd, sample_profile
     ):
-        mock_content = MagicMock()
-        mock_content.text = "Here is your resume but without any XML tags."
-        mock_message = MagicMock()
-        mock_message.content = [mock_content]
+        mock_response = _make_openai_response("Here is your resume but without any XML tags.")
 
-        with patch("app.tailor.anthropic.Anthropic") as MockClient:
-            MockClient.return_value.messages.create.return_value = mock_message
-            with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-test"}):
+        with patch("app.tailor.OpenAI") as MockClient:
+            MockClient.return_value.chat.completions.create.return_value = mock_response
+            with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
                 with pytest.raises(ValueError, match="missing <resume_tex>"):
                     tailor(sample_resume, sample_jd, sample_profile)
 
@@ -110,5 +115,5 @@ class TestTailor:
         self, sample_resume, sample_jd, sample_profile
     ):
         with patch.dict("os.environ", {}, clear=True):
-            with pytest.raises(EnvironmentError, match="ANTHROPIC_API_KEY"):
+            with pytest.raises(EnvironmentError, match="OPENAI_API_KEY"):
                 tailor(sample_resume, sample_jd, sample_profile)

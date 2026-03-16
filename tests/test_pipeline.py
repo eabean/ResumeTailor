@@ -36,7 +36,7 @@ def sample_profile():
 
 @pytest.fixture
 def mock_tailor_result():
-    data = json.loads((FIXTURES / "mock_claude_response.json").read_text())
+    data = json.loads((FIXTURES / "mock_response.json").read_text())
     from app.tailor import TailorResult
     return TailorResult(
         resume_tex=data["resume_tex"],

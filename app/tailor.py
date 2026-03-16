@@ -1,5 +1,5 @@
 """
-Claude API integration — resume tailoring and cover letter generation.
+OpenAI API integration — resume tailoring and cover letter generation.
 
 Single combined call returns both outputs to minimize latency and API cost.
 
@@ -7,10 +7,10 @@ Data flow:
   base_tex + job_desc + profile
         │
         ▼
-  build_context()  ← formats all inputs into a single prompt context
+  build_context()  ← formats all inputs into a single user message
         │
         ▼
-  Claude API call  ← one call, structured XML response
+  OpenAI API call  ← one call, structured XML response
         │
         ▼
   _extract_tag()   ← parses <resume_tex> and <cover_letter_tex> from response
@@ -19,24 +19,20 @@ Data flow:
   TailorResult(resume_tex, cover_letter_tex)
 """
 
+import json
 import os
 import re
 from dataclasses import dataclass
 
-import anthropic
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
-MODEL = "claude-sonnet-4-6"
+MODEL = "gpt-4o"
 
-TAILOR_PROMPT = """\
+SYSTEM_PROMPT = """\
 You are an expert resume writer and LaTeX typesetter.
-
-You will receive:
-1. A base LaTeX resume
-2. A job description
-3. An applicant profile with background context
 
 Your task:
 - Rewrite the resume experience bullets and summary to better match the job description
@@ -78,22 +74,22 @@ class TailorResult:
     cover_letter_tex: str
 
 
-def _get_client() -> anthropic.Anthropic:
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+def _get_client() -> OpenAI:
+    api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise EnvironmentError(
-            "ANTHROPIC_API_KEY not set. Copy .env.example to .env and add your key."
+            "OPENAI_API_KEY not set. Copy .env.example to .env and add your key."
         )
-    return anthropic.Anthropic(api_key=api_key)
+    return OpenAI(api_key=api_key)
 
 
 def _extract_tag(text: str, tag: str) -> str:
-    """Extract content from an XML-style tag in Claude's response."""
+    """Extract content from an XML-style tag in the model's response."""
     pattern = rf"<{tag}>(.*?)</{tag}>"
     match = re.search(pattern, text, re.DOTALL)
     if not match:
         raise ValueError(
-            f"Claude response is missing <{tag}> tag. "
+            f"Response is missing <{tag}> tag. "
             f"Response received:\n{text[:500]}..."
         )
     return match.group(1).strip()
@@ -101,7 +97,6 @@ def _extract_tag(text: str, tag: str) -> str:
 
 def build_context(base_tex: str, job_desc: str, profile: dict) -> str:
     """Format all inputs into a single context string for the prompt."""
-    import json
     return (
         f"=== APPLICANT PROFILE ===\n{json.dumps(profile, indent=2)}\n\n"
         f"=== JOB DESCRIPTION ===\n{job_desc.strip()}\n\n"
@@ -111,25 +106,23 @@ def build_context(base_tex: str, job_desc: str, profile: dict) -> str:
 
 def tailor(base_tex: str, job_desc: str, profile: dict) -> TailorResult:
     """
-    Call Claude to produce a tailored resume and cover letter.
+    Call the OpenAI API to produce a tailored resume and cover letter.
     Returns a TailorResult with both .tex sources.
     Raises ValueError if the response is malformed.
     """
     client = _get_client()
     context = build_context(base_tex, job_desc, profile)
 
-    message = client.messages.create(
+    response = client.chat.completions.create(
         model=MODEL,
         max_tokens=8096,
         messages=[
-            {
-                "role": "user",
-                "content": f"{TAILOR_PROMPT}\n\n{context}",
-            }
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": context},
         ],
     )
 
-    response_text = message.content[0].text
+    response_text = response.choices[0].message.content
     resume_tex = _extract_tag(response_text, "resume_tex")
     cover_letter_tex = _extract_tag(response_text, "cover_letter_tex")
 
@@ -138,18 +131,18 @@ def tailor(base_tex: str, job_desc: str, profile: dict) -> TailorResult:
 
 def fix_latex(broken_tex: str, error_log: str, tag: str = "resume_tex") -> str:
     """
-    Ask Claude to fix a LaTeX compilation error.
+    Ask the model to fix a LaTeX compilation error.
     Used by pipeline.py in the retry loop.
     Returns the corrected LaTeX source.
     """
     client = _get_client()
     prompt = FIX_LATEX_PROMPT.format(error_log=error_log, broken_tex=broken_tex)
 
-    message = client.messages.create(
+    response = client.chat.completions.create(
         model=MODEL,
         max_tokens=8096,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    response_text = message.content[0].text
+    response_text = response.choices[0].message.content
     return _extract_tag(response_text, tag)
