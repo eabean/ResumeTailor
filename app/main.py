@@ -259,7 +259,7 @@ with tab_profile:
     new_experience = []
     for i in range(st.session_state.exp_count):
         exp = experience[i] if i < len(experience) else {}
-        label = exp.get("title") or f"Role {i + 1}"
+        label = f"Role {i + 1}"
         with st.expander(label, expanded=(i == 0)):
             c1, c2 = st.columns(2)
             with c1:
@@ -295,7 +295,7 @@ with tab_profile:
     new_projects = []
     for i in range(st.session_state.proj_count):
         proj = projects[i] if i < len(projects) else {}
-        label = proj.get("name") or f"Project {i + 1}"
+        label = f"Project {i + 1}"
         with st.expander(label, expanded=(i == 0)):
             c1, c2 = st.columns(2)
             with c1:
@@ -326,7 +326,7 @@ with tab_profile:
     new_education = []
     for i in range(st.session_state.edu_count):
         edu = education[i] if i < len(education) else {}
-        label = edu.get("institution") or f"Education {i + 1}"
+        label = f"Education {i + 1}"
         with st.expander(label, expanded=(i == 0)):
             c1, c2 = st.columns(2)
             with c1:
@@ -396,11 +396,8 @@ with tab_profile:
             with c2:
                 tch = st.text_input("Tech", sc.get("tech", ""), key=f"sc_tech_{i}")
             act = st.text_area("Action", sc.get("action", ""), key=f"sc_act_{i}", height=80)
-            c1, c2 = st.columns(2)
-            with c1:
-                res = st.text_area("Result", sc.get("result", ""), key=f"sc_res_{i}", height=80)
-            with c2:
-                rel = st.text_area("Relevance", sc.get("relevance", ""), key=f"sc_rel_{i}", height=80)
+            res = st.text_area("Result", sc.get("result", ""), key=f"sc_res_{i}", height=80)
+            rel = st.text_area("Relevance", sc.get("relevance", ""), key=f"sc_rel_{i}", height=80)
             new_scenarios.append({"context": ctx, "action": act, "result": res, "relevance": rel, "tech": tch})
     c1, c2 = st.columns([1, 5])
     with c1:
