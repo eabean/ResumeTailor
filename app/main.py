@@ -18,8 +18,9 @@ import json
 
 import streamlit as st
 
-from app import tracker
+from app import latex, tracker
 from app.diff import diff_to_html, has_changes
+from app.latex import LatexCompileError
 from app.models import ApplicationStatus
 from app.pipeline import run_pipeline
 
@@ -453,6 +454,37 @@ with tab_apps:
                 if app.jd_snippet:
                     with st.expander("Job description snippet"):
                         st.text(app.jd_snippet)
+
+                pdf_col1, pdf_col2 = st.columns(2)
+                slug = app.company.lower().replace(" ", "_")
+                with pdf_col1:
+                    if app.resume_tex:
+                        try:
+                            resume_pdf = latex.compile(app.resume_tex)
+                            st.download_button(
+                                "⬇️ Download Resume PDF",
+                                data=resume_pdf,
+                                file_name=f"resume_{slug}.pdf",
+                                mime="application/pdf",
+                                key=f"dl_resume_{app.id}",
+                                use_container_width=True,
+                            )
+                        except LatexCompileError as e:
+                            st.error(f"Resume compilation failed: {e}")
+                with pdf_col2:
+                    if app.cover_letter_tex:
+                        try:
+                            cover_pdf = latex.compile(app.cover_letter_tex)
+                            st.download_button(
+                                "⬇️ Download Cover Letter PDF",
+                                data=cover_pdf,
+                                file_name=f"cover_letter_{slug}.pdf",
+                                mime="application/pdf",
+                                key=f"dl_cover_{app.id}",
+                                use_container_width=True,
+                            )
+                        except LatexCompileError as e:
+                            st.error(f"Cover letter compilation failed: {e}")
 
                 exp_col1, exp_col2 = st.columns(2)
                 with exp_col1:
