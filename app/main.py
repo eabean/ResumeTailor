@@ -163,7 +163,7 @@ with tab_tailor:
     if tailor_btn and ready:
         with st.status("Tailoring your resume...", expanded=True) as status:
             try:
-                st.write("Calling Claude API...")
+                st.write("Calling OpenAI API...")
                 result = run_pipeline(
                     base_tex=base_tex,
                     base_cover_tex=base_cover_tex,

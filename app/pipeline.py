@@ -5,12 +5,12 @@ Full pipeline flow:
   base_tex + job_desc + profile + company + job_title
         │
         ▼
-  tailor.tailor()         ← Claude API: produces tailored_tex + cover_tex
+  tailor.tailor()         ← OpenAI API: produces tailored_tex + cover_tex
         │
         ├──▶ compile_with_retry(tailored_tex, tag="resume_tex")
         │           │
         │           ├── success ──▶ resume_pdf (bytes)
-        │           └── failure ──▶ fix via Claude, retry up to 3x
+        │           └── failure ──▶ fix via OpenAI, retry up to 3x
         │
         ├──▶ compile_with_retry(cover_tex, tag="cover_letter_tex")
         │           └── resume_pdf + cover_pdf (bytes)
@@ -43,7 +43,7 @@ class PipelineResult:
 
 def _compile_with_retry(tex: str, tag: str) -> bytes:
     """
-    Attempt to compile tex to PDF. On failure, ask Claude to fix the LaTeX
+    Attempt to compile tex to PDF. On failure, ask OpenAI to fix the LaTeX
     and retry. Raises LatexCompileError if all retries are exhausted.
 
     Retry state machine:
@@ -92,9 +92,9 @@ def run_pipeline(
         PipelineResult with PDFs, .tex sources, diff, and application ID.
 
     Raises:
-        ValueError:         If Claude returns a malformed response.
+        ValueError:         If OpenAI returns a malformed response.
         LatexCompileError:  If PDF compilation fails after all retries.
-        EnvironmentError:   If ANTHROPIC_API_KEY is missing.
+        EnvironmentError:   If OPENAI_API_KEY is missing.
     """
     tailor_result = tailor.tailor(base_tex, base_cover_tex, job_desc, profile)
 
