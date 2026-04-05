@@ -2,9 +2,10 @@
 Streamlit UI — Resume Tailor
 
 Layout:
-  Sidebar:  base resume upload + applicant profile editor
+  Sidebar:  base resume / cover letter status
   Tab 1:    Tailor Resume (JD input → pipeline → diff + downloads)
-  Tab 2:    Applications dashboard (tracker table + status updates)
+  Tab 2:    Applicant Profile editor
+  Tab 3:    Applications dashboard (tracker table + status updates)
 """
 
 import sys
@@ -54,7 +55,7 @@ BASE_RESUME_PATH = Path("data/BaseResume.tex")
 BASE_COVER_PATH = Path("data/BaseCoverLetter.tex")
 
 with st.sidebar:
-    st.header("Base Resume")
+    st.header("Base Files")
     base_tex: str | None = None
     if BASE_RESUME_PATH.exists():
         base_tex = BASE_RESUME_PATH.read_text(encoding="utf-8")
@@ -84,39 +85,30 @@ with st.sidebar:
         st.error(f"Base cover letter not found at {BASE_COVER_PATH}")
 
     st.divider()
+    sample_profile = {
+        "name": "", "phone": "", "email": "", "linkedin": "", "github": "", "portfolio": "",
+        "experience": [{"title": "", "company": "", "location": "", "duration": "", "bullets": []}],
+        "projects": [{"name": "", "tech": "", "bullets": []}],
+        "education": [{"institution": "", "credential": "", "location": "", "year": ""}],
+        "skills": {"languages": [], "tools": []},
+        "certs": [],
+        "scenarios": [{"context": "", "action": "", "result": "", "relevance": "", "tech": ""}],
+    }
+    st.download_button(
+        "⬇️ Download Sample Profile",
+        data=json.dumps(sample_profile, indent=2),
+        file_name="applicant_profile.json",
+        mime="application/json",
+        use_container_width=True,
+    )
 
-    st.header("Applicant Profile")
-    profile = load_profile()
+# ── Load profile (available to all tabs) ──────────────────────────────────
 
-    with st.expander("Edit Profile", expanded=not bool(profile.get("name"))):
-        profile["name"] = st.text_input("Full Name", profile.get("name", ""))
-        profile["email"] = st.text_input("Email", profile.get("email", ""))
-        profile["phone"] = st.text_input("Phone", profile.get("phone", ""))
-        profile["location"] = st.text_input("Location", profile.get("location", ""))
-        profile["linkedin"] = st.text_input("LinkedIn URL", profile.get("linkedin", ""))
-        profile["github"] = st.text_input("GitHub URL", profile.get("github", ""))
-        profile["summary"] = st.text_area(
-            "Professional Summary",
-            profile.get("summary", ""),
-            height=100,
-        )
-        skills_str = ", ".join(profile.get("skills", []))
-        skills_input = st.text_input("Skills (comma-separated)", skills_str)
-        profile["skills"] = [s.strip() for s in skills_input.split(",") if s.strip()]
-        profile["extra_context"] = st.text_area(
-            "Extra Context for Claude",
-            profile.get("extra_context", ""),
-            height=80,
-            help="Career goals, pivots, preferences — anything Claude should know.",
-        )
-
-        if st.button("Save Profile", type="primary"):
-            save_profile(profile)
-            st.success("Profile saved.")
+profile = load_profile()
 
 # ── Main tabs ──────────────────────────────────────────────────────────────
 
-tab_tailor, tab_apps = st.tabs(["✏️ Tailor Resume", "📋 Applications"])
+tab_tailor, tab_profile, tab_apps = st.tabs(["✏️ Tailor Resume", "👤 Profile", "📋 Applications"])
 
 # ── Tab 1: Tailor ──────────────────────────────────────────────────────────
 
@@ -217,7 +209,207 @@ with tab_tailor:
         with st.expander("View cover letter .tex source"):
             st.code(result.cover_letter_tex, language="latex")
 
-# ── Tab 2: Applications ────────────────────────────────────────────────────
+# ── Tab 2: Profile ─────────────────────────────────────────────────────────
+
+with tab_profile:
+    st.subheader("Applicant Profile")
+
+    uploaded = st.file_uploader("Upload applicant_profile.json", type="json", label_visibility="collapsed")
+    if uploaded is not None:
+        try:
+            uploaded_profile = json.loads(uploaded.read().decode("utf-8"))
+            save_profile(uploaded_profile)
+            profile = uploaded_profile
+            st.success("Profile loaded from file.")
+        except Exception as e:
+            st.error(f"Failed to parse JSON: {e}")
+
+    # ── Contact ──────────────────────────────────────────────────────────────
+    st.markdown("#### Contact")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        profile["name"] = st.text_input("Full Name", profile.get("name", ""))
+    with c2:
+        profile["phone"] = st.text_input("Phone", profile.get("phone", ""))
+    with c3:
+        profile["email"] = st.text_input("Email", profile.get("email", ""))
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        profile["linkedin"] = st.text_input("LinkedIn URL", profile.get("linkedin", ""))
+    with c2:
+        profile["github"] = st.text_input("GitHub URL", profile.get("github", ""))
+    with c3:
+        profile["portfolio"] = st.text_input("Portfolio URL", profile.get("portfolio", ""))
+
+    # ── Experience ────────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("#### Experience")
+    experience = profile.get("experience", [])
+    if "exp_count" not in st.session_state:
+        st.session_state.exp_count = max(len(experience), 1)
+    new_experience = []
+    for i in range(st.session_state.exp_count):
+        exp = experience[i] if i < len(experience) else {}
+        label = exp.get("title") or f"Role {i + 1}"
+        with st.expander(label, expanded=(i == 0)):
+            c1, c2 = st.columns(2)
+            with c1:
+                t = st.text_input("Job Title", exp.get("title", ""), key=f"exp_title_{i}")
+            with c2:
+                c = st.text_input("Company", exp.get("company", ""), key=f"exp_company_{i}")
+            c1, c2 = st.columns(2)
+            with c1:
+                l = st.text_input("Location", exp.get("location", ""), key=f"exp_location_{i}")
+            with c2:
+                d = st.text_input("Duration", exp.get("duration", ""), key=f"exp_duration_{i}")
+            b_str = "\n".join(exp.get("bullets", []))
+            b_in = st.text_area("Bullets (one per line)", b_str, key=f"exp_bullets_{i}", height=120)
+            bullets = [b.strip() for b in b_in.splitlines() if b.strip()]
+            new_experience.append({"title": t, "company": c, "location": l, "duration": d, "bullets": bullets})
+    c1, c2 = st.columns([1, 5])
+    with c1:
+        if st.button("+ Add Role", key="add_exp"):
+            st.session_state.exp_count += 1
+            st.rerun()
+    with c2:
+        if st.button("- Remove Last Role", key="rem_exp") and st.session_state.exp_count > 1:
+            st.session_state.exp_count -= 1
+            st.rerun()
+    profile["experience"] = new_experience
+
+    # ── Projects ──────────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("#### Projects")
+    projects = profile.get("projects", [])
+    if "proj_count" not in st.session_state:
+        st.session_state.proj_count = max(len(projects), 1)
+    new_projects = []
+    for i in range(st.session_state.proj_count):
+        proj = projects[i] if i < len(projects) else {}
+        label = proj.get("name") or f"Project {i + 1}"
+        with st.expander(label, expanded=(i == 0)):
+            c1, c2 = st.columns(2)
+            with c1:
+                n = st.text_input("Project Name", proj.get("name", ""), key=f"proj_name_{i}")
+            with c2:
+                t = st.text_input("Tech Stack", proj.get("tech", ""), key=f"proj_tech_{i}")
+            b_str = "\n".join(proj.get("bullets", []))
+            b_in = st.text_area("Bullets (one per line)", b_str, key=f"proj_bullets_{i}", height=120)
+            bullets = [b.strip() for b in b_in.splitlines() if b.strip()]
+            new_projects.append({"name": n, "tech": t, "bullets": bullets})
+    c1, c2 = st.columns([1, 5])
+    with c1:
+        if st.button("+ Add Project", key="add_proj"):
+            st.session_state.proj_count += 1
+            st.rerun()
+    with c2:
+        if st.button("- Remove Last Project", key="rem_proj") and st.session_state.proj_count > 1:
+            st.session_state.proj_count -= 1
+            st.rerun()
+    profile["projects"] = new_projects
+
+    # ── Education ─────────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("#### Education")
+    education = profile.get("education", [])
+    if "edu_count" not in st.session_state:
+        st.session_state.edu_count = max(len(education), 1)
+    new_education = []
+    for i in range(st.session_state.edu_count):
+        edu = education[i] if i < len(education) else {}
+        label = edu.get("institution") or f"Education {i + 1}"
+        with st.expander(label, expanded=(i == 0)):
+            c1, c2 = st.columns(2)
+            with c1:
+                inst = st.text_input("Institution", edu.get("institution", ""), key=f"edu_inst_{i}")
+            with c2:
+                cred = st.text_input("Credential", edu.get("credential", ""), key=f"edu_cred_{i}")
+            c1, c2 = st.columns(2)
+            with c1:
+                loc = st.text_input("Location", edu.get("location", ""), key=f"edu_loc_{i}")
+            with c2:
+                yr = st.text_input("Year", edu.get("year", ""), key=f"edu_year_{i}")
+            new_education.append({"institution": inst, "credential": cred, "location": loc, "year": yr})
+    c1, c2 = st.columns([1, 5])
+    with c1:
+        if st.button("+ Add Education", key="add_edu"):
+            st.session_state.edu_count += 1
+            st.rerun()
+    with c2:
+        if st.button("- Remove Last Education", key="rem_edu") and st.session_state.edu_count > 1:
+            st.session_state.edu_count -= 1
+            st.rerun()
+    profile["education"] = new_education
+
+    # ── Skills ────────────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("#### Skills")
+    skills = profile.get("skills", {"languages": [], "tools": []})
+    if not isinstance(skills, dict):
+        skills = {"languages": [], "tools": []}
+    c1, c2 = st.columns(2)
+    with c1:
+        lang_in = st.text_input(
+            "Languages (comma-separated)",
+            ", ".join(skills.get("languages", [])),
+        )
+    with c2:
+        tools_in = st.text_input(
+            "Tools & Technologies (comma-separated)",
+            ", ".join(skills.get("tools", [])),
+        )
+    profile["skills"] = {
+        "languages": [s.strip() for s in lang_in.split(",") if s.strip()],
+        "tools": [s.strip() for s in tools_in.split(",") if s.strip()],
+    }
+
+    # ── Certificates ──────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("#### Certificates & Awards")
+    certs = profile.get("certs", [])
+    certs_in = st.text_input("Certificates (comma-separated)", ", ".join(certs))
+    profile["certs"] = [c.strip() for c in certs_in.split(",") if c.strip()]
+
+    # ── CARL Scenarios ────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("#### CARL Scenarios")
+    st.caption("Used as inputs to customize your cover letter.")
+    scenarios = profile.get("scenarios", [])
+    if "sc_count" not in st.session_state:
+        st.session_state.sc_count = max(len(scenarios), 1)
+    new_scenarios = []
+    for i in range(st.session_state.sc_count):
+        sc = scenarios[i] if i < len(scenarios) else {}
+        with st.expander(f"Scenario", expanded=(i == 0)):
+            c1, c2 = st.columns([3, 1])
+            with c1:
+                ctx = st.text_area("Context", sc.get("context", ""), key=f"sc_ctx_{i}", height=80)
+            with c2:
+                tch = st.text_input("Tech", sc.get("tech", ""), key=f"sc_tech_{i}")
+            act = st.text_area("Action", sc.get("action", ""), key=f"sc_act_{i}", height=80)
+            c1, c2 = st.columns(2)
+            with c1:
+                res = st.text_area("Result", sc.get("result", ""), key=f"sc_res_{i}", height=80)
+            with c2:
+                rel = st.text_area("Relevance", sc.get("relevance", ""), key=f"sc_rel_{i}", height=80)
+            new_scenarios.append({"context": ctx, "action": act, "result": res, "relevance": rel, "tech": tch})
+    c1, c2 = st.columns([1, 5])
+    with c1:
+        if st.button("+ Add Scenario", key="add_sc"):
+            st.session_state.sc_count += 1
+            st.rerun()
+    with c2:
+        if st.button("- Remove Last Scenario", key="rem_sc") and st.session_state.sc_count > 1:
+            st.session_state.sc_count -= 1
+            st.rerun()
+    profile["scenarios"] = new_scenarios
+
+    st.divider()
+    if st.button("Save Profile", type="primary", use_container_width=True):
+        save_profile(profile)
+        st.success("Profile saved.")
+
+# ── Tab 3: Applications ────────────────────────────────────────────────────
 
 with tab_apps:
     st.subheader("Application Tracker")

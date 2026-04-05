@@ -5,7 +5,6 @@
   "linkedin": "",
   "github": "",
   "portfolio": "",
-
   "experience": [
     {
       "title": "",
@@ -29,7 +28,6 @@
       "bullets": []
     }
   ],
-
   "projects": [
     {
       "name": "",
@@ -42,7 +40,6 @@
       "bullets": []
     }
   ],
-
   "education": [
     {
       "institution": "",
@@ -51,21 +48,18 @@
       "year": ""
     }
   ],
-
   "skills": {
     "languages": [],
     "tools": []
   },
-
   "certs": [],
-
-   "scenarios": [
+  "scenarios": [
     {
       "context": "",
       "action": "",
       "result": "",
       "relevance": "",
-      "tech" : ""
+      "tech": ""
     }
   ]
 }
