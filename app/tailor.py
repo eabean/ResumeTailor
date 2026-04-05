@@ -243,7 +243,7 @@ def tailor(base_tex: str, base_cover_tex: str, job_desc: str, profile: dict) -> 
 
     response = client.chat.completions.create(
         model=MODEL,
-        max_tokens=8096,
+        max_completion_tokens=8096,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": context},
@@ -268,7 +268,7 @@ def fix_latex(broken_tex: str, error_log: str, tag: str = "resume_tex") -> str:
 
     response = client.chat.completions.create(
         model=MODEL,
-        max_tokens=8096,
+        max_completion_tokens=8096,
         messages=[{"role": "user", "content": prompt}],
     )
 
