@@ -1,27 +1,71 @@
 {
-  "name": "Your Name",
-  "email": "you@email.com",
-  "phone": "555-555-5555",
-  "location": "City, State",
-  "linkedin": "linkedin.com/in/yourprofile",
-  "github": "github.com/yourusername",
-  "summary": "A brief 2-3 sentence summary of who you are professionally and what you're looking for.",
-  "skills": [
-    "Python",
-    "SQL",
-    "Add your skills here"
-  ],
-  "education": [
+  "name": "",
+  "phone": "",
+  "email": "",
+  "linkedin": "",
+  "github": "",
+  "portfolio": "",
+
+  "experience": [
     {
-      "institution": "University Name",
-      "degree": "B.S. Computer Science",
-      "year": "2024"
+      "title": "",
+      "company": "",
+      "location": "",
+      "duration": "",
+      "bullets": []
+    },
+    {
+      "title": "",
+      "company": "",
+      "location": "",
+      "duration": "",
+      "bullets": []
+    },
+    {
+      "title": "",
+      "company": "",
+      "location": "",
+      "duration": "",
+      "bullets": []
     }
   ],
-  "preferences": {
-    "job_types": ["Full-time", "Hybrid"],
-    "locations": ["Remote", "New York, NY"],
-    "industries": ["Software", "Fintech"]
+
+  "projects": [
+    {
+      "name": "",
+      "tech": "",
+      "bullets": []
+    },
+    {
+      "name": "",
+      "tech": "",
+      "bullets": []
+    }
+  ],
+
+  "education": [
+    {
+      "institution": "",
+      "credential": "",
+      "location": "",
+      "year": ""
+    }
+  ],
+
+  "skills": {
+    "languages": [],
+    "tools": []
   },
-  "extra_context": "Any additional context about your experience, career goals, or preferences that should inform how your resume is tailored. For example: 'I want to emphasize my backend experience over frontend. I am pivoting from finance to tech.'"
+
+  "certs": [],
+
+   "scenarios": [
+    {
+      "context": "",
+      "action": "",
+      "result": "",
+      "relevance": "",
+      "tech" : ""
+    }
+  ]
 }
