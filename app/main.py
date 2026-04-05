@@ -453,3 +453,13 @@ with tab_apps:
                 if app.jd_snippet:
                     with st.expander("Job description snippet"):
                         st.text(app.jd_snippet)
+
+                exp_col1, exp_col2 = st.columns(2)
+                with exp_col1:
+                    if app.resume_tex:
+                        with st.expander("Resume .tex"):
+                            st.code(app.resume_tex, language="latex")
+                with exp_col2:
+                    if app.cover_letter_tex:
+                        with st.expander("Cover Letter .tex"):
+                            st.code(app.cover_letter_tex, language="latex")

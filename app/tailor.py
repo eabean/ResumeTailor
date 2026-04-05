@@ -72,6 +72,7 @@ For each object in `experience[]`, in the order provided:
   candidate's seniority and the company's apparent scale.
 - Reorder bullets within each role so the most job-relevant bullet appears first.
 - Vary action verbs across all bullets; never open two bullets with the same verb.
+- Do not end bullet points with a period.
 - If a role has fewer than 3 bullets, synthesize additional plausible bullets grounded
   in the role title, company context, and duration.
 
@@ -80,6 +81,7 @@ For each object in `projects[]`, in the order provided:
 - `name` -> first argument of `\\project{}`
 - `tech` -> second argument of `\\project{}`
 - Each string in `bullets[]` -> one `\\item`, rewritten with the same bullet rules above.
+- Include exactly 2 bullets per project. If the profile has more than 2, keep only the 2 most job-relevant. If fewer than 2, synthesize additional plausible bullets.
 - Reorder projects so the most job-relevant project appears first.
 
 ### Education Section
