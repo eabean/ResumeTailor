@@ -85,6 +85,7 @@ with st.sidebar:
         st.error(f"Base cover letter not found at {BASE_COVER_PATH}")
 
     st.divider()
+    st.header("Profile Files")
     sample_profile = {
         "name": "", "phone": "", "email": "", "linkedin": "", "github": "", "portfolio": "",
         "experience": [{"title": "", "company": "", "location": "", "duration": "", "bullets": []}],
@@ -97,6 +98,14 @@ with st.sidebar:
     st.download_button(
         "⬇️ Download Sample Profile",
         data=json.dumps(sample_profile, indent=2),
+        file_name="applicant_profile.json",
+        mime="application/json",
+        use_container_width=True,
+    )
+    current_profile = load_profile()
+    st.download_button(
+        "⬇️ Download Current Profile",
+        data=json.dumps(current_profile, indent=2),
         file_name="applicant_profile.json",
         mime="application/json",
         use_container_width=True,
