@@ -188,6 +188,24 @@ Score: [0-100]
 </gap_analysis>
 """
 
+TRIM_PROMPT = """\
+The following LaTeX resume compiled to more than one page. Trim it to fit exactly one page.
+
+Rules:
+- Start by removing the least job-relevant bullet points from the Work Experience section first.
+  Work through each role and drop its weakest bullet before moving to the next role.
+  Only after reducing all roles to a minimum of 2 bullets should you consider removing bullets elsewhere.
+- Do not touch the Projects, Education, or Technical Skills sections unless absolutely necessary.
+- Never remove a role entirely.
+- Do not change any LaTeX structure, commands, or formatting — only reduce content.
+- Keep all LaTeX syntax valid and fully compilable.
+
+LaTeX source:
+{resume_tex}
+
+Return only the trimmed LaTeX inside <resume_tex> tags.
+"""
+
 FIX_LATEX_PROMPT = """\
 The following LaTeX document failed to compile. Fix the LaTeX syntax errors so it compiles correctly.
 
@@ -281,3 +299,18 @@ def fix_latex(broken_tex: str, error_log: str, tag: str = "resume_tex") -> str:
 
     response_text = response.choices[0].message.content
     return _extract_tag(response_text, tag)
+
+
+def trim_to_one_page(resume_tex: str) -> str:
+    """Ask the model to trim a resume LaTeX source until it fits one page."""
+    client = _get_client()
+    prompt = TRIM_PROMPT.format(resume_tex=resume_tex)
+
+    response = client.chat.completions.create(
+        model=MODEL,
+        max_completion_tokens=8096,
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    response_text = response.choices[0].message.content
+    return _extract_tag(response_text, "resume_tex")

@@ -91,3 +91,11 @@ def compile(tex_content: str, filename: str = "document") -> bytes:
             )
 
         return pdf_path.read_bytes()
+
+
+def page_count(pdf_bytes: bytes) -> int:
+    """Return the number of pages in a PDF using pypdf."""
+    import io
+    from pypdf import PdfReader
+    reader = PdfReader(io.BytesIO(pdf_bytes))
+    return len(reader.pages)

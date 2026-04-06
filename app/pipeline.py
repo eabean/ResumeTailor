@@ -29,6 +29,7 @@ from app.diff import DiffLine
 from app.latex import LatexCompileError
 
 MAX_COMPILE_RETRIES = 3
+MAX_TRIM_RETRIES = 3
 
 
 @dataclass
@@ -98,23 +99,32 @@ def run_pipeline(
     """
     tailor_result = tailor.tailor(base_tex, base_cover_tex, job_desc, profile)
 
-    resume_pdf = _compile_with_retry(tailor_result.resume_tex, tag="resume_tex")
+    resume_tex = tailor_result.resume_tex
+    resume_pdf = _compile_with_retry(resume_tex, tag="resume_tex")
+
+    # Enforce one-page resume: trim and recompile if needed
+    for _ in range(MAX_TRIM_RETRIES):
+        if latex.page_count(resume_pdf) <= 1:
+            break
+        resume_tex = tailor.trim_to_one_page(resume_tex)
+        resume_pdf = _compile_with_retry(resume_tex, tag="resume_tex")
+
     cover_pdf = _compile_with_retry(tailor_result.cover_letter_tex, tag="cover_letter_tex")
 
-    diff_lines = diff_module.generate_diff(base_tex, tailor_result.resume_tex)
+    diff_lines = diff_module.generate_diff(base_tex, resume_tex)
 
     app_id = tracker.save_application(
         company=company,
         job_title=job_title,
         job_description=job_desc,
-        resume_tex=tailor_result.resume_tex,
+        resume_tex=resume_tex,
         cover_letter_tex=tailor_result.cover_letter_tex,
     )
 
     return PipelineResult(
         resume_pdf=resume_pdf,
         cover_pdf=cover_pdf,
-        resume_tex=tailor_result.resume_tex,
+        resume_tex=resume_tex,
         cover_letter_tex=tailor_result.cover_letter_tex,
         diff_lines=diff_lines,
         application_id=app_id,
