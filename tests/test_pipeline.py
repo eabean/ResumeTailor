@@ -25,6 +25,14 @@ def sample_resume():
 
 
 @pytest.fixture
+def sample_cover():
+    return (
+        "\\documentclass{article}\\begin{document}"
+        "Dear Hiring Manager, I am applying.\\end{document}"
+    )
+
+
+@pytest.fixture
 def sample_jd():
     return (FIXTURES / "sample_jd.txt").read_text(encoding="utf-8")
 
@@ -89,14 +97,15 @@ class TestCompileWithRetry:
 
 class TestRunPipeline:
     def test_happy_path_returns_pipeline_result(
-        self, sample_resume, sample_jd, sample_profile, mock_tailor_result
+        self, sample_resume, sample_cover, sample_jd, sample_profile, mock_tailor_result
     ):
         fake_pdf = b"%PDF fake"
 
         with patch("app.pipeline.tailor.tailor", return_value=mock_tailor_result), \
              patch("app.pipeline.latex.compile", return_value=fake_pdf), \
+             patch("app.pipeline.latex.page_count", return_value=1), \
              patch("app.pipeline.tracker.save_application", return_value=1):
-            result = run_pipeline(sample_resume, sample_jd, sample_profile, "Acme", "Engineer")
+            result = run_pipeline(sample_resume, sample_cover, sample_jd, sample_profile, "Acme", "Engineer")
 
         assert isinstance(result, PipelineResult)
         assert result.resume_pdf == fake_pdf
@@ -105,20 +114,68 @@ class TestRunPipeline:
         assert isinstance(result.diff_lines, list)
 
     def test_diff_generated_between_base_and_tailored(
-        self, sample_resume, sample_jd, sample_profile, mock_tailor_result
+        self, sample_resume, sample_cover, sample_jd, sample_profile, mock_tailor_result
     ):
         with patch("app.pipeline.tailor.tailor", return_value=mock_tailor_result), \
              patch("app.pipeline.latex.compile", return_value=b"%PDF"), \
+             patch("app.pipeline.latex.page_count", return_value=1), \
              patch("app.pipeline.tracker.save_application", return_value=1):
-            result = run_pipeline(sample_resume, sample_jd, sample_profile, "Acme", "Engineer")
+            result = run_pipeline(sample_resume, sample_cover, sample_jd, sample_profile, "Acme", "Engineer")
 
-        # tailored tex differs from sample_resume, so diff should have changes
         from app.diff import has_changes
         assert has_changes(result.diff_lines)
 
+    def test_resume_only_skips_cover_compile(
+        self, sample_resume, sample_cover, sample_jd, sample_profile, mock_tailor_result
+    ):
+        mock_tailor_result.cover_letter_tex = None
+        fake_pdf = b"%PDF fake"
+
+        with patch("app.pipeline.tailor.tailor", return_value=mock_tailor_result) as mock_t, \
+             patch("app.pipeline.latex.compile", return_value=fake_pdf), \
+             patch("app.pipeline.latex.page_count", return_value=1), \
+             patch("app.pipeline.tracker.save_application", return_value=1):
+            result = run_pipeline(
+                sample_resume, sample_cover, sample_jd, sample_profile, "Acme", "Engineer",
+                tailor_resume=True, tailor_cover=False,
+            )
+            _, kwargs = mock_t.call_args
+            assert kwargs.get("tailor_cover") is False
+
+        assert result.resume_pdf == fake_pdf
+        assert result.cover_pdf is None
+
+    def test_cover_only_skips_resume_compile(
+        self, sample_resume, sample_cover, sample_jd, sample_profile, mock_tailor_result
+    ):
+        mock_tailor_result.resume_tex = None
+        fake_pdf = b"%PDF fake"
+
+        with patch("app.pipeline.tailor.tailor", return_value=mock_tailor_result) as mock_t, \
+             patch("app.pipeline.latex.compile", return_value=fake_pdf), \
+             patch("app.pipeline.tracker.save_application", return_value=1):
+            result = run_pipeline(
+                sample_resume, sample_cover, sample_jd, sample_profile, "Acme", "Engineer",
+                tailor_resume=False, tailor_cover=True,
+            )
+            _, kwargs = mock_t.call_args
+            assert kwargs.get("tailor_resume") is False
+
+        assert result.resume_pdf is None
+        assert result.cover_pdf == fake_pdf
+
+    def test_raises_when_neither_document_selected(
+        self, sample_resume, sample_cover, sample_jd, sample_profile
+    ):
+        with pytest.raises(ValueError, match="At least one"):
+            run_pipeline(
+                sample_resume, sample_cover, sample_jd, sample_profile, "Acme", "Engineer",
+                tailor_resume=False, tailor_cover=False,
+            )
+
     def test_propagates_tailor_value_error(
-        self, sample_resume, sample_jd, sample_profile
+        self, sample_resume, sample_cover, sample_jd, sample_profile
     ):
         with patch("app.pipeline.tailor.tailor", side_effect=ValueError("bad response")):
             with pytest.raises(ValueError, match="bad response"):
-                run_pipeline(sample_resume, sample_jd, sample_profile, "Acme", "Engineer")
+                run_pipeline(sample_resume, sample_cover, sample_jd, sample_profile, "Acme", "Engineer")

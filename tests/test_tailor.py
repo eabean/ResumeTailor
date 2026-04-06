@@ -23,6 +23,14 @@ def sample_resume():
 
 
 @pytest.fixture
+def sample_cover():
+    return (
+        "\\documentclass{article}\\begin{document}"
+        "Dear Hiring Manager, I am applying.\\end{document}"
+    )
+
+
+@pytest.fixture
 def sample_jd():
     return (FIXTURES / "sample_jd.txt").read_text(encoding="utf-8")
 
@@ -74,34 +82,72 @@ class TestExtractTag:
 
 
 class TestBuildContext:
-    def test_includes_all_three_sections(self, sample_resume, sample_jd, sample_profile):
-        ctx = build_context(sample_resume, sample_jd, sample_profile)
+    def test_includes_all_sections(self, sample_resume, sample_cover, sample_jd, sample_profile):
+        ctx = build_context(sample_resume, sample_cover, sample_jd, sample_profile)
         assert "APPLICANT PROFILE" in ctx
         assert "JOB DESCRIPTION" in ctx
         assert "BASE RESUME" in ctx
+        assert "BASE COVER LETTER" in ctx
 
-    def test_profile_is_json_serialised(self, sample_resume, sample_jd, sample_profile):
-        ctx = build_context(sample_resume, sample_jd, sample_profile)
+    def test_profile_is_json_serialised(self, sample_resume, sample_cover, sample_jd, sample_profile):
+        ctx = build_context(sample_resume, sample_cover, sample_jd, sample_profile)
         assert "Jane Doe" in ctx
 
 
 class TestTailor:
     def test_happy_path_returns_tailor_result(
-        self, sample_resume, sample_jd, sample_profile, mock_response_text
+        self, sample_resume, sample_cover, sample_jd, sample_profile, mock_response_text
     ):
         mock_response = _make_openai_response(mock_response_text)
 
         with patch("app.tailor.OpenAI") as MockClient:
             MockClient.return_value.chat.completions.create.return_value = mock_response
             with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
-                result = tailor(sample_resume, sample_jd, sample_profile)
+                result = tailor(sample_resume, sample_cover, sample_jd, sample_profile)
 
         assert isinstance(result, TailorResult)
         assert "\\documentclass" in result.resume_tex
         assert "\\documentclass" in result.cover_letter_tex
 
+    def test_resume_only_returns_none_cover(
+        self, sample_resume, sample_cover, sample_jd, sample_profile, mock_response_text
+    ):
+        # Response only contains resume_tex tag
+        data = json.loads((FIXTURES / "mock_response.json").read_text())
+        resume_only_response = f"<resume_tex>\n{data['resume_tex']}\n</resume_tex>"
+        mock_response = _make_openai_response(resume_only_response)
+
+        with patch("app.tailor.OpenAI") as MockClient:
+            MockClient.return_value.chat.completions.create.return_value = mock_response
+            with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
+                result = tailor(
+                    sample_resume, sample_cover, sample_jd, sample_profile,
+                    tailor_resume=True, tailor_cover=False,
+                )
+
+        assert result.resume_tex is not None
+        assert result.cover_letter_tex is None
+
+    def test_cover_only_returns_none_resume(
+        self, sample_resume, sample_cover, sample_jd, sample_profile
+    ):
+        data = json.loads((FIXTURES / "mock_response.json").read_text())
+        cover_only_response = f"<cover_letter_tex>\n{data['cover_letter_tex']}\n</cover_letter_tex>"
+        mock_response = _make_openai_response(cover_only_response)
+
+        with patch("app.tailor.OpenAI") as MockClient:
+            MockClient.return_value.chat.completions.create.return_value = mock_response
+            with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
+                result = tailor(
+                    sample_resume, sample_cover, sample_jd, sample_profile,
+                    tailor_resume=False, tailor_cover=True,
+                )
+
+        assert result.resume_tex is None
+        assert result.cover_letter_tex is not None
+
     def test_malformed_response_raises_value_error(
-        self, sample_resume, sample_jd, sample_profile
+        self, sample_resume, sample_cover, sample_jd, sample_profile
     ):
         mock_response = _make_openai_response("Here is your resume but without any XML tags.")
 
@@ -109,11 +155,11 @@ class TestTailor:
             MockClient.return_value.chat.completions.create.return_value = mock_response
             with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
                 with pytest.raises(ValueError, match="missing <resume_tex>"):
-                    tailor(sample_resume, sample_jd, sample_profile)
+                    tailor(sample_resume, sample_cover, sample_jd, sample_profile)
 
     def test_missing_api_key_raises_environment_error(
-        self, sample_resume, sample_jd, sample_profile
+        self, sample_resume, sample_cover, sample_jd, sample_profile
     ):
         with patch.dict("os.environ", {}, clear=True):
             with pytest.raises(EnvironmentError, match="OPENAI_API_KEY"):
-                tailor(sample_resume, sample_jd, sample_profile)
+                tailor(sample_resume, sample_cover, sample_jd, sample_profile)
