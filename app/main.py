@@ -89,6 +89,7 @@ with st.sidebar:
     st.header("Profile Files")
     sample_profile = {
         "name": "", "phone": "", "email": "", "linkedin": "", "github": "", "portfolio": "",
+        "summary": "",
         "experience": [{"title": "", "company": "", "location": "", "duration": "", "bullets": []}],
         "projects": [{"name": "", "tech": "", "bullets": []}],
         "education": [{"institution": "", "credential": "", "location": "", "year": ""}],
@@ -250,6 +251,17 @@ with tab_profile:
         profile["github"] = st.text_input("GitHub URL", profile.get("github", ""))
     with c3:
         profile["portfolio"] = st.text_input("Portfolio URL", profile.get("portfolio", ""))
+
+    # ── Summary ───────────────────────────────────────────────────────────────
+    st.divider()
+    st.markdown("#### Summary")
+    profile["summary"] = st.text_area(
+        "Professional Summary",
+        profile.get("summary", ""),
+        placeholder="e.g. Backend engineer with 4 years of experience in financial services, specializing in Python and distributed systems...",
+        height=100,
+        label_visibility="collapsed",
+    )
 
     # ── Experience ────────────────────────────────────────────────────────────
     st.divider()

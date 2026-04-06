@@ -105,6 +105,7 @@ For each object in `education[]`:
 
 ## RESUME TAILORING RULES
 
+- Always preserve the order of `experience[]` exactly as provided — do not reorder roles. The most recent role must appear first.
 - Draw only from `experience[]`, `projects[]`, `education[]`, `skills`, and `certs` in the
   applicant profile. Do NOT use `scenarios[]` for resume content.
 - Do NOT invent, embellish, or add credentials, roles, or skills not found in the inputs.
@@ -124,7 +125,11 @@ Avoid overly corporate language and do not be forceful. Focus on how the candida
 Structure: 4 paragraphs.
 
 ### Paragraph 1 -- Introduction & Thesis
-- Open with a concise professional background of the candidate drawn from the applicant profile.
+- Open by introducing the candidate in their own voice, drawn directly from the `summary` field
+  in the applicant profile. Use it as the basis for a natural first sentence that grounds who they
+  are — their role, years of experience, and domain (e.g. "I am a backend engineer with four years
+  of experience in financial services..."). If `summary` is empty, derive an equivalent introduction
+  from the experience and profile data.
 - Explicitly name the job title and company name to state the candidate's interest in the role.
 - Close with a single thesis sentence identifying the 3 most relevant hard skills, soft skills,
   technologies, or experiences from the profile that demonstrate suitability for this role.
