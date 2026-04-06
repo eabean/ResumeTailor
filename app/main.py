@@ -119,7 +119,7 @@ profile = load_profile()
 
 # ── Main tabs ──────────────────────────────────────────────────────────────
 
-tab_tailor, tab_profile, tab_apps = st.tabs(["✏️ Tailor Resume", "👤 Profile", "📋 Applications"])
+tab_tailor, tab_profile, tab_apps = st.tabs(["✏️ Tailor", "👤 Profile", "📋 Applications"])
 
 # ── Tab 1: Tailor ──────────────────────────────────────────────────────────
 
@@ -140,12 +140,20 @@ with tab_tailor:
         st.subheader("Actions")
         st.write("")
 
-        ready = bool(base_tex and base_cover_tex and job_desc.strip() and company.strip() and job_title.strip())
+        do_resume = st.checkbox("Tailor Resume", value=True)
+        do_cover = st.checkbox("Tailor Cover Letter", value=True)
+
+        ready = bool(
+            job_desc.strip() and company.strip() and job_title.strip()
+            and (do_resume or do_cover)
+            and (base_tex if do_resume else True)
+            and (base_cover_tex if do_cover else True)
+        )
         if not ready:
             missing = []
-            if not base_tex:
+            if do_resume and not base_tex:
                 missing.append("base resume (data/BaseResume.tex not found)")
-            if not base_cover_tex:
+            if do_cover and not base_cover_tex:
                 missing.append("base cover letter (data/BaseCoverLetter.tex not found)")
             if not job_desc.strip():
                 missing.append("job description")
@@ -153,17 +161,19 @@ with tab_tailor:
                 missing.append("company name")
             if not job_title.strip():
                 missing.append("job title")
+            if not do_resume and not do_cover:
+                missing.append("at least one document selected")
             st.info(f"Still needed: {', '.join(missing)}")
 
         tailor_btn = st.button(
-            "🚀 Tailor Resume",
+            "🚀 Tailor",
             type="primary",
             disabled=not ready,
             use_container_width=True,
         )
 
     if tailor_btn and ready:
-        with st.status("Tailoring your resume...", expanded=True) as status:
+        with st.status("Tailoring...", expanded=True) as status:
             try:
                 st.write("Calling OpenAI API...")
                 result = run_pipeline(
@@ -173,6 +183,8 @@ with tab_tailor:
                     profile=profile,
                     company=company,
                     job_title=job_title,
+                    tailor_resume=do_resume,
+                    tailor_cover=do_cover,
                 )
                 st.write("Compiling PDFs...")
                 st.write("Generating diff...")
@@ -188,37 +200,42 @@ with tab_tailor:
         st.divider()
         st.subheader("Results")
 
+        slug = company.lower().replace(" ", "_")
         dl_col1, dl_col2 = st.columns(2)
         with dl_col1:
-            st.download_button(
-                "⬇️ Download Resume PDF",
-                data=result.resume_pdf,
-                file_name=f"resume_{company.lower().replace(' ', '_')}.pdf",
-                mime="application/pdf",
-                use_container_width=True,
-            )
+            if result.resume_pdf:
+                st.download_button(
+                    "⬇️ Download Resume PDF",
+                    data=result.resume_pdf,
+                    file_name=f"resume_{slug}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
         with dl_col2:
-            st.download_button(
-                "⬇️ Download Cover Letter PDF",
-                data=result.cover_pdf,
-                file_name=f"cover_letter_{company.lower().replace(' ', '_')}.pdf",
-                mime="application/pdf",
-                use_container_width=True,
-            )
+            if result.cover_pdf:
+                st.download_button(
+                    "⬇️ Download Cover Letter PDF",
+                    data=result.cover_pdf,
+                    file_name=f"cover_letter_{slug}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
 
         st.caption(f"Application saved to tracker (ID: {result.application_id})")
 
-        st.subheader("What Changed")
-        if has_changes(result.diff_lines):
-            st.markdown(diff_to_html(result.diff_lines), unsafe_allow_html=True)
-        else:
-            st.info("No changes detected between base and tailored resume.")
+        if result.resume_tex:
+            st.subheader("What Changed")
+            if has_changes(result.diff_lines):
+                st.markdown(diff_to_html(result.diff_lines), unsafe_allow_html=True)
+            else:
+                st.info("No changes detected between base and tailored resume.")
 
-        with st.expander("View tailored .tex source"):
-            st.code(result.resume_tex, language="latex")
+            with st.expander("View tailored .tex source"):
+                st.code(result.resume_tex, language="latex")
 
-        with st.expander("View cover letter .tex source"):
-            st.code(result.cover_letter_tex, language="latex")
+        if result.cover_letter_tex:
+            with st.expander("View cover letter .tex source"):
+                st.code(result.cover_letter_tex, language="latex")
 
 # ── Tab 2: Profile ─────────────────────────────────────────────────────────
 

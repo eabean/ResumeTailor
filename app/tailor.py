@@ -222,8 +222,8 @@ Do not change any content, only fix the syntax errors.
 
 @dataclass
 class TailorResult:
-    resume_tex: str
-    cover_letter_tex: str
+    resume_tex: str | None
+    cover_letter_tex: str | None
 
 
 def _get_client() -> OpenAI:
@@ -257,27 +257,41 @@ def build_context(base_tex: str, base_cover_tex: str, job_desc: str, profile: di
     )
 
 
-def tailor(base_tex: str, base_cover_tex: str, job_desc: str, profile: dict) -> TailorResult:
+def tailor(
+    base_tex: str,
+    base_cover_tex: str,
+    job_desc: str,
+    profile: dict,
+    company: str = "",
+    tailor_resume: bool = True,
+    tailor_cover: bool = True,
+) -> TailorResult:
     """
-    Call the OpenAI API to produce a tailored resume and cover letter.
-    Returns a TailorResult with both .tex sources.
-    Raises ValueError if the response is malformed.
+    Call the OpenAI API to produce a tailored resume and/or cover letter.
+    Returns a TailorResult; fields are None if that document was not requested.
     """
     client = _get_client()
     context = build_context(base_tex, base_cover_tex, job_desc, profile)
+
+    # Tell the model which documents to produce
+    scope_note = ""
+    if tailor_resume and not tailor_cover:
+        scope_note = "\n\nIMPORTANT: Only produce the <resume_tex> output. Do not produce <cover_letter_tex> or <gap_analysis>."
+    elif tailor_cover and not tailor_resume:
+        scope_note = "\n\nIMPORTANT: Only produce the <cover_letter_tex> output. Do not produce <resume_tex> or <gap_analysis>."
 
     response = client.chat.completions.create(
         model=MODEL,
         max_completion_tokens=8096,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": context},
+            {"role": "user", "content": context + scope_note},
         ],
     )
 
     response_text = response.choices[0].message.content
-    resume_tex = _extract_tag(response_text, "resume_tex")
-    cover_letter_tex = _extract_tag(response_text, "cover_letter_tex")
+    resume_tex = _extract_tag(response_text, "resume_tex") if tailor_resume else None
+    cover_letter_tex = _extract_tag(response_text, "cover_letter_tex") if tailor_cover else None
 
     return TailorResult(resume_tex=resume_tex, cover_letter_tex=cover_letter_tex)
 
