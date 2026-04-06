@@ -21,6 +21,7 @@ import streamlit as st
 from app import latex, tracker
 from app.diff import diff_to_html, has_changes
 from app.latex import LatexCompileError
+from app.jobfetch import fetch_job_posting
 from app.models import ApplicationStatus
 from app.pipeline import run_pipeline
 
@@ -124,16 +125,47 @@ tab_tailor, tab_profile, tab_apps = st.tabs(["✏️ Tailor", "👤 Profile", "�
 # ── Tab 1: Tailor ──────────────────────────────────────────────────────────
 
 with tab_tailor:
+    # ── LinkedIn URL fetch ──────────────────────────────────────────────────
+    li_col, btn_col = st.columns([5, 1])
+    with li_col:
+        li_url = st.text_input(
+            "Job Posting URL",
+            placeholder="Paste any job posting URL...",
+            label_visibility="collapsed",
+        )
+    with btn_col:
+        li_fetch = st.button("🔗 Import", use_container_width=True, help="Fetch job details from LinkedIn")
+
+    if li_fetch and li_url.strip():
+        with st.spinner("Fetching from LinkedIn..."):
+            try:
+                fetched = fetch_job_posting(li_url.strip())
+                st.session_state["_li_company"] = fetched["company"]
+                st.session_state["_li_job_title"] = fetched["job_title"]
+                st.session_state["_li_job_desc"] = fetched["job_desc"]
+                st.success("Job details imported.")
+            except Exception as e:
+                st.error(f"Could not import: {e}")
+
     col1, col2 = st.columns([1, 1])
 
     with col1:
         st.subheader("Job Details")
-        company = st.text_input("Company Name", placeholder="Acme Corp")
-        job_title = st.text_input("Job Title", placeholder="Software Engineer")
+        company = st.text_input(
+            "Company Name",
+            placeholder="Acme Corp",
+            key="_li_company",
+        )
+        job_title = st.text_input(
+            "Job Title",
+            placeholder="Software Engineer",
+            key="_li_job_title",
+        )
         job_desc = st.text_area(
             "Job Description",
             placeholder="Paste the full job description here...",
             height=350,
+            key="_li_job_desc",
         )
 
     with col2:
