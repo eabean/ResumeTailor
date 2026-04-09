@@ -1,10 +1,10 @@
 # ResumeTailor
 
-A Streamlit app that uses an LLM to tailor your resume and cover letter to a specific job posting. Paste a job description (or import it from a URL), and the app rewrites your LaTeX resume and cover letter to match — then compiles them to PDF.
+A lcoally run web-app that uses an LLM to tailor your resume and cover letter to a specific job posting. Paste a job description (or import it from a URL), and the app rewrites your LaTeX resume and cover letter to match — then compiles them to PDF.
 
 ## What it does
 
-- **Tailor tab** — paste a job description or import it from a job posting URL (Built In, Indeed, Greenhouse, and most other sites). The app calls the OpenAI API to rewrite your resume bullets and cover letter to match the posting, compiles both to PDF, and shows a line-by-line diff of what changed.
+- **Tailor tab** — paste a job description or import it from a job posting URL. The app calls the OpenAI API to rewrite your resume bullets and cover letter to match the posting, compiles both to PDF, and shows a line-by-line diff of what changed.
 - **Profile tab** — view and upload your `applicant_profile.json`, which is the source of truth for all your experience, skills, and contact info.
 - **Applications tab** — tracks every tailored application in a local SQLite database. Update statuses (Draft → Applied → Interview → Offer / Rejected) and browse past outputs.
 
@@ -142,13 +142,5 @@ This file is what the AI reads to populate your resume. Fill it in with your rea
 ```
 
 You can upload a new `applicant_profile.json` at any time from the **Profile** tab without restarting the app.
-
----
-
-## Importing job postings from a URL
-
-In the **Tailor** tab, paste any job posting URL into the top bar and click **Import**. The importer first looks for structured `schema.org/JobPosting` data embedded in the page (works on Built In, Indeed, Greenhouse, Lever, and most modern boards). If none is found, it falls back to stripping the page to plain text and asking the LLM to extract the fields.
-
-The only URLs this won't work on are postings that require a login to view.
 
 ---
