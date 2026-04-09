@@ -1,0 +1,72 @@
+\documentclass[11pt]{letter}
+\usepackage[utf8]{inputenc}
+\usepackage[empty]{fullpage}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{fontawesome5}
+\usepackage{eso-pic}
+\usepackage[T1]{fontenc}
+\usepackage{calligra}
+
+\addtolength{\topmargin}{-0.5in}
+\addtolength{\textheight}{0.5in}
+\definecolor{gr}{RGB}{225,225,225}
+
+\newcommand{\myname}{Jordan Park}
+\newcommand{\mylocation}{Vancouver, BC}
+\newcommand{\myemail}{jordan.park.eng@outlook.com}
+\newcommand{\mylinkedin}{jordanpark-eng}
+\newcommand{\mygithub}{jordanparkeng}
+\newcommand{\myphone}{778-340-5621}
+
+\newcommand{\recipient}{Hiring Team}
+\newcommand{\greeting}{Dear}
+\newcommand{\closer}{Sincerely}
+
+\begin{document}
+
+\begin{center}
+{\huge\scshape\textbf{\myname}}\\[5pt]
+\small \mylocation\\[3pt]
+\footnotesize
+\resizebox{\textwidth}{!}{%
+    \faPhone\ \href{tel:\myphone}{\myphone}\enspace
+    \faEnvelope\ \href{mailto:\myemail}{\myemail}\enspace
+    \faLinkedin\ \href{https://www.linkedin.com/in/\mylinkedin}{\mylinkedin}\enspace
+    \faGithub\ \href{https://github.com/\mygithub}{\mygithub}\enspace
+    \faBook\ \href{https://jordanpark.dev}{jordanpark.dev}%
+}
+\end{center}
+
+\vspace{0.2in}
+
+\today\\
+
+\vspace{-0.1in}\recipient\\
+\company\\
+
+\vspace{-0.1in}\greeting\ \recipient,\\
+
+\vspace{-0.1in}\setlength\parindent{12pt}
+\noindent
+
+I am a software engineer with nearly two years of professional experience in backend and full-stack development across financial platforms and production systems. I am excited to apply for the Software Engineer (L2) role at Point because the opportunity to support and grow a multi-product digital platform on the Docket Operations pillar strongly matches the kind of practical, collaborative engineering work I enjoy. My experience building backend APIs, writing tested and reliable code in Python and C\#, and supporting integrations across production systems makes me well suited for this role.
+
+At Terra Investments, the platform lacked secure and scalable authentication across services as the backend grew to support more production traffic. I implemented token-based authentication and authorization using Entra ID and JWT across 12 RESTful APIs, working within the existing ASP.NET Core service architecture to improve how systems interacted securely. That work reduced vulnerabilities by 35\% while sustaining more than 1.5 million weekly API interactions with exceptional uptime. This experience aligns directly with Point's need for an engineer who can support API integrations, maintain secure and reliable code, and troubleshoot production systems with care.
+
+At Vantage Financial Technologies, the platform had no integration with accounting software, which forced manual financial reconciliation across more than 300 businesses. I extended Django data models and built GraphQL and REST APIs to connect the product with a leading accounting SaaS and make data flow automatically between systems. The result was a streamlined synchronization process that removed manual reconciliation steps and improved operational efficiency for customers. This is closely connected to Point's responsibility for supporting database updates, API integrations, and internal tooling improvements in partnership with product teams.
+
+I would also bring a collaborative mindset and a willingness to learn quickly from senior engineers and peer feedback, which I understand is important for this role. In past work and team projects, I have contributed through code reviews, structured pull requests, testing, and sprint-based collaboration, and I value clear communication about progress, blockers, and risks. I would be excited to contribute to Point as a Software Engineer (L2), and thank you for your time and consideration. If you would like to contact me, please email me at jordan.park.eng@outlook.com.
+
+\vspace{0.1in}
+
+\begin{flushleft}
+\closer,
+
+\large
+{\LARGE\calligra\myname}\\[4mm]
+
+\myname\\
+\end{flushleft}
+
+\end{document}

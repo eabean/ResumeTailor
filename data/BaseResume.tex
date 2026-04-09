@@ -1,0 +1,114 @@
+%======================================================
+% Jordan Park – Resume
+% Compile with: xelatex resume.tex  (or pdflatex)
+% Requires packages: fontawesome5, titlesec, enumitem,
+%                    hyperref, geometry
+%======================================================
+\documentclass[11pt, letterpaper]{article}
+
+\usepackage[top=0.35in, bottom=0.35in, left=0.45in, right=0.45in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{fontawesome5}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\titleformat{\section}
+    {\scshape\large\raggedright}
+    {}{0em}{}
+    [\titlerule]
+\titlespacing{\section}{0pt}{5pt}{5pt}
+
+\usepackage{enumitem}
+\setlist[itemize]{
+    itemsep=0pt,
+    parsep=0pt,
+    topsep=0pt,
+    partopsep=0pt
+}
+
+\usepackage{array}
+\usepackage{graphicx}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+\newcommand{\entry}[2]{%
+    \noindent\textbf{#1}\hfill#2\\[0pt]%
+}
+\newcommand{\subentry}[2]{%
+    \noindent\textit{#1}\hfill#2\\[-12pt]%
+}
+\newcommand{\project}[2]{%
+    \noindent\textbf{#1}\hfill\textit{#2}\\[-12pt]%
+}
+
+\begin{document}
+
+\begin{center}
+      {\huge\scshape\textbf{Jordan Park}}\\[5pt]
+      \small Vancouver, BC\\[3pt]
+      \resizebox{\textwidth}{!}{%
+          \faPhone\ 778-340-5621\enspace
+          \faEnvelope\ \href{mailto:jordan.park.eng@outlook.com}{jordan.park.eng@outlook.com}\enspace
+          \faLinkedin\ \href{https://linkedin.com/in/jordanpark-eng}{linkedin.com/in/jordanpark-eng}\enspace
+          \faGithub\ \href{https://github.com/jordanparkeng}{github.com/jordanparkeng}\enspace
+          \faBook\ \href{https://jordanpark.dev}{jordanpark.dev}%
+}
+  \end{center}
+
+\section{Work Experience}
+\entry{Terra Investments}{Jan 2023 -- Present}
+\subentry{Software Engineer}{Burnaby, BC}
+\begin{itemize}
+    \item Built and maintained 12 \textbf{REST APIs} by using ASP.NET Core and Entity Framework to support frontend-backend integrations, resulting in 1.5 million weekly interactions and exceptional uptime in production systems
+    \item Strengthened \textbf{security} across backend services by implementing token-based authentication and authorization with Entra ID and JWT, resulting in a 35\% reduction in system vulnerabilities
+    \item Refined production \textbf{backend} performance by refactoring SQL Server queries and indexing strategies, resulting in a 40\% improvement in API response times and lower peak-hour server load
+    \item Established \textbf{CI/CD}-style deployment workflows by creating Azure DevOps pipelines for unified frontend and backend integration, resulting in a 30\% boost in deployment efficiency
+    \item Improved code quality and \textbf{unit tests} coverage by authoring xUnit and Moq test suites across the codebase, resulting in sustained 85\% coverage and more reliable releases
+    \item Resolved critical production issues by architecting and delivering a backend system for the bank's insurance service, resulting in the closure of 25 high-priority bugs and a 15\% increase in customer satisfaction
+\end{itemize}
+\vspace{4pt}
+
+\entry{Vantage Financial Technologies}{Sep 2022 -- Dec 2022}
+\subentry{Software Developer (Contract)}{Vancouver, BC}
+\begin{itemize}
+    \item Integrated a fund management platform with third-party accounting software by extending Django data models and building \textbf{REST APIs} and GraphQL services, resulting in streamlined financial synchronization across 300+ businesses
+    \item Designed a high-volume ingestion workflow by developing Python, Django, SQL, and React components for bulk transaction processing, resulting in support for 5,000 concurrent transactions in a single batch
+    \item Scaled cloud services for production reliability by provisioning workloads on a managed Kubernetes cluster and adding live alerting functions, resulting in stable performance during an 80\% surge in concurrent traffic
+\end{itemize}
+
+\section{Projects}
+
+\project{ShelfScan}{JavaScript, React Native, Firebase}
+  \begin{itemize}
+      \item Delivered a full-stack mobile application by building 15+ screens in JavaScript and React Native with Firebase-backed services, resulting in a complete retail price comparison experience across core user journeys
+      \item Implemented data and user workflows by modeling NoSQL structures and CRUD operations across 4 collections, resulting in barcode lookup, personalized shopping lists, and proximity-based price comparisons for end users
+  \end{itemize}
+\vspace{2pt}
+
+\project{AquaTrail Explorer App}{Android Studio, SQLite}
+  \begin{itemize}
+      \item Developed a mobile app with searchable and data-driven features by implementing an auto-complete search bar, exhibit checklist, and A*-based route planner on SQLite, resulting in a streamlined navigation experience for aquarium visitors
+      \item Improved maintainability and testing discipline by applying MVVM architecture and delivering 95 JUnit cases with Espresso UI suites, resulting in more reliable releases and cleaner system design
+  \end{itemize}
+\vspace{2pt}
+
+\section{Education}
+
+\entry{University of Toronto}{2017 - 2022}
+\subentry{B.Sc. Computer Science with High Distinction}{Vancouver, BC}
+\vspace{2pt}
+
+\section{Technical Skills}
+
+\begin{itemize}
+    \item \textbf{Languages}: Python, TypeScript, JavaScript, SQL, C\#, C++, Java
+    \item \textbf{Technology \& Tools}: Django, React, ASP.NET Core, Entity Framework, Azure DevOps, xUnit, SQL Server, Entra ID, JWT, Flask, Moq
+\end{itemize}
+
+\section{Certificates and Awards}
+
+\begin{itemize}
+    \item AWS Certified Cloud Practitioner, Certified Kubernetes Application Developer
+\end{itemize}
+
+\end{document}

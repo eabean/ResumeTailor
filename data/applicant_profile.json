@@ -1,65 +1,115 @@
 {
-  "name": "",
-  "phone": "",
-  "email": "",
-  "linkedin": "",
-  "github": "",
-  "portfolio": "",
+  "name": "Jordan Park",
+  "phone": "778-340-5621",
+  "email": "jordan.park.eng@outlook.com",
+  "linkedin": "linkedin.com/in/jordanpark-eng",
+  "github": "github.com/jordanparkeng",
+  "portfolio": "jordanpark.dev",
+  "summary": "",
   "experience": [
     {
-      "title": "",
-      "company": "",
-      "location": "",
-      "duration": "",
-      "bullets": []
+      "title": "Software Engineer",
+      "company": "Terra Investments",
+      "location": "Burnaby, BC",
+      "duration": "Jan 2023 – Present",
+      "bullets": [
+        "Architected and delivered a backend system for the bank's insurance service, addressing 25 critical bugs and driving a 15% increase in customer satisfaction.",
+        "Built and maintained a suite of 12 RESTful APIs using ASP.NET Core and Entity Framework, supporting over 1.5 million weekly interactions between frontend and backend systems and sustaining an exceptional API uptime rate.",
+        "Implemented token-based authentication and authorization using Entra ID and JWT, strengthening security mechanisms and reducing overall system vulnerabilities by 35%.",
+        "Established Azure DevOps pipelines to unify frontend and backend code integration, automating deployment workflows and boosting deployment efficiency by 30%.",
+        "Authored unit tests with xUnit and Moq, maintaining 85% code coverage across the codebase.",
+        "Refactored SQL Server queries and indexing strategies, yielding a 40% improvement in API response times and lowering server load during peak hours."
+      ]
     },
     {
-      "title": "",
-      "company": "",
-      "location": "",
-      "duration": "",
-      "bullets": []
-    },
-    {
-      "title": "",
-      "company": "",
-      "location": "",
-      "duration": "",
-      "bullets": []
+      "title": "Software Developer (Contract)",
+      "company": "Vantage Financial Technologies",
+      "location": "Vancouver, BC",
+      "duration": "Sep 2022 – Dec 2022",
+      "bullets": [
+        "Integrated a fund management platform with a widely-used accounting SaaS, extending Django data models and building out GraphQL and REST APIs to streamline financial synchronization across 300+ businesses.",
+        "Designed and shipped a bulk transaction ingestion feature (Python, Django, SQL, React) capable of handling up to 5,000 concurrent transactions in a single batch.",
+        "Provisioned services on a managed Kubernetes cluster to absorb an 80% surge in concurrent traffic; implemented cloud functions to push live cluster-level alerts."
+      ]
     }
   ],
   "projects": [
     {
-      "name": "",
-      "tech": "",
-      "bullets": []
+      "name": "ShelfScan",
+      "tech": "JavaScript, React Native, Firebase",
+      "bullets": [
+        "Delivered a full-stack retail price comparison mobile application in JavaScript and React Native, backed by Firebase and spanning 15+ distinct screens.",
+        "Modelled flexible NoSQL data structures and implemented CRUD operations across 4 collections, enabling barcode-driven product lookup, proximity-based price comparison, and personalised shopping lists.",
+        "Integrated authentication, granular security rules, and cloud file storage; coordinated collaborative development through Git with feature branches and structured pull request reviews following agile conventions."
+      ]
     },
     {
-      "name": "",
-      "tech": "",
-      "bullets": []
+      "name": "AquaTrail Explorer App",
+      "tech": "Android Studio, SQLite",
+      "bullets": [
+        "Built an Android app for a regional aquarium, implemented an auto-complete search bar, personalized exhibit checklist, and A*-based route planner, powered by a lightweight SQLite store.",
+        "Designed the app following MVVM architecture, enforcing scalable design patterns such as dependency injection etc.",
+        "Boosted reliability with 95 JUnit cases, end-to-end Espresso UI suites; organized bi-weekly Scrum sprints."
+      ]
     }
   ],
   "education": [
     {
-      "institution": "",
-      "credential": "",
-      "location": "",
-      "year": ""
+      "institution": "University of British Columbia",
+      "credential": "B.Sc. Computer Science with High Distinction",
+      "location": "Vancouver, BC",
+      "year": "2017 - 2022"
     }
   ],
   "skills": {
-    "languages": [],
-    "tools": []
+    "languages": [
+      "Python",
+      "C++",
+      "JavaScript",
+      "TypeScript",
+      "SQL",
+      "C#",
+      "Java"
+    ],
+    "tools": [
+      "ASP.NET Core",
+      "Entity Framework",
+      "Entra ID",
+      "JWT",
+      "Azure DevOps",
+      "xUnit",
+      "Moq",
+      "SQL Server",
+      "Django",
+      "Flask",
+      "React"
+    ]
   },
-  "certs": [],
+  "certs": [
+    "AWS Certified Cloud Practitioner",
+    "Certified Kubernetes Application Developer"
+  ],
   "scenarios": [
     {
-      "context": "",
-      "action": "",
-      "result": "",
-      "relevance": "",
-      "tech": ""
+      "context": "At Terra Investments, the insurance service backend had accumulated 25 critical bugs, degrading reliability and customer satisfaction.",
+      "action": "Architected and delivered a backend system resolving 25 critical bugs using ASP.NET Core and Entity Framework.",
+      "result": "Drove a 15% increase in customer satisfaction and improved overall system reliability.",
+      "relevance": "Demonstrates ability to own and stabilize backend systems in a financial domain.",
+      "tech": "ASP.NET Core, Entity Framework, SQL Server"
+    },
+    {
+      "context": "At Terra Investments, the platform lacked secure and scalable authentication across services.",
+      "action": "Implemented token-based authentication and authorization using Entra ID and JWT across 12 RESTful APIs.",
+      "result": "Reduced system vulnerabilities by 35% and sustained over 1.5 million weekly API interactions with exceptional uptime.",
+      "relevance": "Shows hands-on experience securing and scaling backend APIs in a production financial environment.",
+      "tech": "ASP.NET Core, Entra ID, JWT, REST APIs"
+    },
+    {
+      "context": "Vantage's platform had no integration with accounting software, requiring manual financial reconciliation across 300+ businesses.",
+      "action": "Extended Django data models and built GraphQL and REST APIs to unify the platform with a leading accounting SaaS.",
+      "result": "Streamlined financial synchronization across 300+ businesses, eliminating manual reconciliation steps.",
+      "relevance": "Highlights experience designing APIs for third-party integrations at scale.",
+      "tech": "Python, Django, GraphQL, REST APIs"
     }
   ]
 }
