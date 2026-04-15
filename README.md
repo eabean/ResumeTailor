@@ -1,6 +1,6 @@
 # ResumeTailor
 
-A lcoally run web-app that uses an LLM to tailor your resume and cover letter to a specific job posting. Paste a job description (or import it from a URL), and the app rewrites your LaTeX resume and cover letter to match — then compiles them to PDF.
+A locally run web-app that uses an LLM to tailor your resume and cover letter to a specific job posting. Paste a job description (or import it from a URL), and the app rewrites your LaTeX resume and cover letter to match — then compiles them to PDF.
 
 ## What it does
 

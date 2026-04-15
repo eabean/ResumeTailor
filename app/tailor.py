@@ -49,13 +49,8 @@ Map every field from the applicant JSON profile into the LaTeX template exactly 
 Do not skip or omit any populated field.
 
 ### Contact Header
-- `name` -> Replace the candidate name in `\\huge\\scshape\\textbf{...}`
-- `phone` -> Replace the `\\faPhone` value
-- `email` -> Replace both the `mailto:` href and display text in `\\faEnvelope`
-- `linkedin` -> Replace the LinkedIn href and display text in `\\faLinkedin`
-- `github` -> Replace the GitHub href and display text in `\\faGithub`
-- `portfolio` -> Replace the portfolio href and display text in `\\faBook`.
-  If the field is empty, omit the `\\faBook` line entirely.
+The contact header (name, phone, email, LinkedIn, GitHub, portfolio) is pre-populated
+before this prompt is called. Do not modify any contact details.
 
 ### Work Experience Section
 For each object in `experience[]`, in the order provided:

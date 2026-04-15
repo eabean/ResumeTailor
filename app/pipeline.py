@@ -25,6 +25,7 @@ from dataclasses import dataclass
 
 from app import diff as diff_module
 from app import latex, tailor, tracker
+from app.contact import inject_placeholders, restore_contact
 from app.diff import DiffLine
 from app.latex import LatexCompileError
 
@@ -99,17 +100,26 @@ def run_pipeline(
     if not tailor_resume and not tailor_cover:
         raise ValueError("At least one of tailor_resume or tailor_cover must be selected.")
 
+    # Phase 1: replace contact values with placeholder tokens so no PII
+    # is sent to the OpenAI API in either the templates or the profile JSON
+    base_tex = inject_placeholders(base_tex)
+    base_cover_tex = inject_placeholders(base_cover_tex)
+
+    _CONTACT_KEYS = {"name", "phone", "email", "linkedin", "github", "portfolio"}
+    profile_for_llm = {k: v for k, v in profile.items() if k not in _CONTACT_KEYS}
+
     tailor_result = tailor.tailor(
-        base_tex, base_cover_tex, job_desc, profile, company=company,
+        base_tex, base_cover_tex, job_desc, profile_for_llm, company=company,
         tailor_resume=tailor_resume, tailor_cover=tailor_cover,
     )
 
+    # Phase 2: restore real contact values into the returned LaTeX before compiling
     resume_tex = None
     resume_pdf = None
     diff_lines = []
 
     if tailor_resume:
-        resume_tex = tailor_result.resume_tex
+        resume_tex = restore_contact(tailor_result.resume_tex, profile)
         resume_pdf = _compile_with_retry(resume_tex, tag="resume_tex")
 
         # Enforce one-page resume: trim and recompile if needed
@@ -125,7 +135,7 @@ def run_pipeline(
     cover_pdf = None
 
     if tailor_cover:
-        cover_letter_tex = tailor_result.cover_letter_tex
+        cover_letter_tex = restore_contact(tailor_result.cover_letter_tex, profile)
         cover_pdf = _compile_with_retry(cover_letter_tex, tag="cover_letter_tex")
 
     app_id = tracker.save_application(

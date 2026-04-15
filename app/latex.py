@@ -21,6 +21,7 @@ Compile flow:
       └── failure ──▶ raise LatexCompileError(error_log)
 """
 
+import os
 import shutil
 import subprocess
 import tempfile
@@ -35,16 +36,33 @@ class LatexCompileError(Exception):
         self.error_log = error_log
 
 
-def _check_tectonic() -> None:
-    """Verify tectonic is available on PATH."""
-    if shutil.which("tectonic") is None:
-        raise EnvironmentError(
-            "tectonic is not installed or not on PATH.\n"
-            "Install it from: https://tectonic-typesetting.github.io/\n"
-            "  Windows: winget install tectonic\n"
-            "  macOS:   brew install tectonic\n"
-            "  Linux:   cargo install tectonic"
-        )
+# Windows fallback locations — winget and Scoop don't always update PATH
+# for the current process (e.g. when launched from an IDE or Streamlit).
+_WINDOWS_FALLBACK_PATHS = [
+    Path(os.environ.get("USERPROFILE", "")) / ".bin" / "tectonic.exe",
+    Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Links" / "tectonic.exe",
+    Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages" / "tectonic" / "tectonic.exe",
+    Path(os.environ.get("USERPROFILE", "")) / "scoop" / "shims" / "tectonic.exe",
+]
+
+
+def _find_tectonic() -> str:
+    """Return the tectonic executable path, searching fallback locations if needed."""
+    found = shutil.which("tectonic")
+    if found:
+        return found
+    for candidate in _WINDOWS_FALLBACK_PATHS:
+        if candidate.exists():
+            return str(candidate)
+    raise EnvironmentError(
+        "tectonic is not installed or not on PATH.\n"
+        "Install it from: https://tectonic-typesetting.github.io/\n"
+        "  Windows: winget install tectonic\n"
+        "  macOS:   brew install tectonic\n"
+        "  Linux:   cargo install tectonic\n\n"
+        "If tectonic is already installed, try restarting your terminal or IDE "
+        "so the updated PATH takes effect."
+    )
 
 
 def compile(tex_content: str, filename: str = "document") -> bytes:
@@ -61,7 +79,7 @@ def compile(tex_content: str, filename: str = "document") -> bytes:
     Raises:
         LatexCompileError: If tectonic reports a compilation error.
     """
-    _check_tectonic()
+    tectonic = _find_tectonic()
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
@@ -71,7 +89,7 @@ def compile(tex_content: str, filename: str = "document") -> bytes:
         tex_path.write_text(tex_content, encoding="utf-8")
 
         result = subprocess.run(
-            ["tectonic", str(tex_path)],
+            [tectonic, str(tex_path)],
             capture_output=True,
             text=True,
             cwd=tmp,
